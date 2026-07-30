@@ -1,0 +1,25 @@
+# Script: PCA, OPLS-DA & Multi-dimensional Correlation Analysis
+# Project: IS-recurrence-prediction-tools
+
+library(ropls)
+library(ggplot2)
+library(corrplot)
+
+# 1. Load Cleaned Data and Clinical Labels
+data <- read.csv("cleaned_metabolomics_data.csv", row.names = 1)
+labels <- read.csv("clinical_labels.csv") # e.g., Group: Control vs Acupuncture
+
+# 2. PCA Analysis (Unsupervised)
+pca_model <- opls(data, plotL = FALSE)
+plot(pca_model, typeVc = "x-score")
+
+# 3. OPLS-DA Analysis (Supervised)
+oplsda_model <- opls(data, labels$Group, predI = 1, orthoI = NA)
+# Extract VIP scores to find key metabolites (e.g., related to SIRT1/PGC-1α axis)
+vip_scores <- getVipVn(oplsda_model)
+
+# 4. Pearson/Spearman Correlation Analysis (Clinical-Metabolic-Molecular)
+# Correlating specific metabolites with NIHSS/mRS scores
+clinical_scores <- labels$NIHSS_Score
+cor_results <- cor(data, clinical_scores, method = "spearman")
+corrplot(cor_results, method = "circle")

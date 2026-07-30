@@ -1,0 +1,23 @@
+# Script: UPLC-Q-TOF/MS Metabolomics Data Cleaning
+# Project: IS-recurrence-prediction-tools
+# Maintainer: Shiyang Liu
+
+library(tidyverse)
+library(impute)
+
+# 1. Load Raw Data (Placeholder for UPLC-Q-TOF/MS data)
+raw_data <- read.csv("raw_metabolomics_data.csv")
+
+# 2. Missing Value Imputation (KNN method)
+# Remove features with > 20% missing values
+filtered_data <- raw_data[, colMeans(is.na(raw_data)) <= 0.2]
+# Impute remaining missing values
+imputed_data <- impute.knn(as.matrix(filtered_data))$data
+
+# 3. Data Normalization (Log transformation and Auto-scaling)
+log_data <- log2(imputed_data + 1)
+normalized_data <- scale(log_data, center = TRUE, scale = TRUE)
+
+# 4. Export Cleaned Data
+write.csv(normalized_data, "cleaned_metabolomics_data.csv")
+print("Data cleaning completed successfully.")
