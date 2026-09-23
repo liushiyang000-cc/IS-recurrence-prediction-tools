@@ -1,0 +1,11 @@
+numpy
+pandas
+scipy
+scikit-learn
+lifelines
+statsmodels
+matplotlib
+jupyterlab
+pyarrow
+openpyxl
+joblib

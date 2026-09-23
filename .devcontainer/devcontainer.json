@@ -1,0 +1,18 @@
+{
+  "name": "RIS Research Cloud",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "REditorSupport.r",
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "eamodio.gitlens"
+      ]
+    }
+  },
+  "postCreateCommand": "bash scripts/bootstrap_env.sh"
+}

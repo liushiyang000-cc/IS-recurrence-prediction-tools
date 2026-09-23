@@ -1,0 +1,50 @@
+name: Cloud smoke test
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  python-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install smoke-test dependencies
+        run: python -m pip install --upgrade pip numpy pandas scikit-learn
+      - name: Validate devcontainer JSON
+        run: python -m json.tool .devcontainer/devcontainer.json > /dev/null
+      - name: Validate shell syntax
+        run: bash -n scripts/bootstrap_env.sh
+      - name: Run Python synthetic checkpoint/resume test
+        run: python tests/test_cloud_worker.py
+
+  r-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+      - name: Run R synthetic preprocessing test
+        run: Rscript tests/test_r_cloud.R
+
+  devcontainer-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build research devcontainer
+        run: docker build -f .devcontainer/Dockerfile -t ris-research-cloud .
+      - name: Verify Python environment as vscode user
+        run: |
+          docker run --rm --user vscode ris-research-cloud             python -c 'import numpy,pandas,scipy,sklearn,lifelines,statsmodels,matplotlib,pyarrow,openpyxl,joblib; print("PASS: Python baked packages import")'
+      - name: Verify R environment as vscode user
+        run: |
+          docker run --rm --user vscode ris-research-cloud             Rscript -e 'stopifnot(all(vapply(c("survival","boot","ggplot2","data.table","readr","dplyr"), requireNamespace, logical(1), quietly=TRUE))); cat("PASS: R baked packages import\n")'
+      - name: Run Codespaces post-create check as vscode user
+        run: |
+          docker run --rm             -v "$PWD:/src:ro"             ris-research-cloud bash -lc             'cp -a /src /tmp/repo && chown -R vscode:vscode /tmp/repo && su -s /bin/bash vscode -c "cd /tmp/repo && bash scripts/bootstrap_env.sh"'
