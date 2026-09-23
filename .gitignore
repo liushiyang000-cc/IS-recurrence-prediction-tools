@@ -1,0 +1,25 @@
+# Patient / raw data: never commit
+data/private/
+data/raw/
+*.dta
+*.sav
+
+# Large local datasets
+*.parquet
+*.feather
+*.h5
+*.hdf5
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# Runtime outputs/checkpoints
+checkpoints/
+results/tmp/
