@@ -1,13 +1,19 @@
 # Kaggle compute node
 
-Use Kaggle for the heavy run, not for primary code editing.
+Use Kaggle for heavy computation, not as the primary code-editing environment.
 
-## Fast workflow
+## First validation
 
-1. Develop and smoke-test in Codespaces.
-2. Commit/push code to GitHub.
-3. In Kaggle, add a **de-identified** dataset.
-4. Copy or sync the relevant script, then run:
+Kaggle uses separate Python and R notebook languages. Test them separately:
+
+1. Create a **Python** notebook, set **Internet = On**, **Accelerator = None**, and use `01_kaggle_smoke_test.ipynb`.
+2. Create an **R** notebook, set **Internet = On**, **Accelerator = None**, and use `02_kaggle_r_smoke_test.ipynb`.
+3. Both notebooks clone the protected `cloud-research-setup` branch and use synthetic data only.
+4. Only after both tests pass should real de-identified analysis data be attached.
+
+## Heavy Python run
+
+After validation:
 
 ```bash
 python kaggle/run_heavy.py \
@@ -15,7 +21,7 @@ python kaggle/run_heavy.py \
   --bootstrap 2000
 ```
 
-5. Download only derived outputs from `/kaggle/working/results/`.
+Derived outputs are written under `/kaggle/working/results/`.
 
 ## Data rule
 
@@ -23,4 +29,8 @@ Never upload names, national IDs, phone numbers, medical-record numbers, address
 
 ## Compute rule
 
-Use CPU for Cox models, classical statistics, PCA, ordinary tree models and most bootstrap validation. Turn on GPU only for workloads that actually support GPU acceleration.
+Use CPU for Cox models, classical statistics, PCA, ordinary tree models, and most bootstrap validation. Enable a GPU only for code that actually uses GPU acceleration.
+
+## Scientific scope
+
+The current `run_heavy.py` is an infrastructure smoke-test worker. Its test AUC is not a manuscript result. The validated RIS Cox/C-index/calibration/Brier/time-dependent AUC/DCA pipeline must replace it before scientific use.
