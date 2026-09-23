@@ -1,10 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-python --version
+# The image bakes the Python environment into /opt/ris-venv.
+# Explicitly prepend it because login/user switching can reset PATH.
+if [ -d /opt/ris-venv/bin ]; then
+  export PATH="/opt/ris-venv/bin:${PATH}"
+fi
+
+PYTHON_BIN="$(command -v python || true)"
+if [ -z "$PYTHON_BIN" ]; then
+  PYTHON_BIN="$(command -v python3 || true)"
+fi
+if [ -z "$PYTHON_BIN" ]; then
+  echo "ERROR: Python interpreter not found." >&2
+  exit 1
+fi
+
+"$PYTHON_BIN" --version
 Rscript --version
 
-python - <<'PY'
+"$PYTHON_BIN" - <<'PY'
 import numpy
 import pandas
 import scipy
