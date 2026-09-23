@@ -1,7 +1,8 @@
 {
   "name": "RIS Research Cloud",
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Dockerfile",
+    "context": ".."
   },
   "customizations": {
     "vscode": {
