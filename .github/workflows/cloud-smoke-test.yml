@@ -19,8 +19,16 @@ jobs:
         run: python -m json.tool .devcontainer/devcontainer.json > /dev/null
       - name: Validate shell syntax
         run: bash -n scripts/bootstrap_env.sh
-      - name: Run synthetic checkpoint/resume test
+      - name: Run Python synthetic checkpoint/resume test
         run: python tests/test_cloud_worker.py
+
+  r-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+      - name: Run R synthetic preprocessing test
+        run: Rscript tests/test_r_cloud.R
 
   devcontainer-smoke:
     runs-on: ubuntu-latest
@@ -30,3 +38,10 @@ jobs:
         run: docker build -f .devcontainer/Dockerfile -t ris-research-cloud .
       - name: Verify Python and R are present
         run: docker run --rm ris-research-cloud bash -lc 'python3 --version && Rscript --version'
+      - name: Run full Codespaces post-create bootstrap inside the container
+        run: |
+          docker run --rm \
+            -v "$PWD:/workspaces/repo" \
+            -w /workspaces/repo \
+            ris-research-cloud \
+            bash -lc 'bash scripts/bootstrap_env.sh && source .venv/bin/activate && python -c "import numpy,pandas,sklearn,lifelines,statsmodels,pyarrow,openpyxl,joblib; print(\\"PASS: Python cloud packages import\\")" && Rscript -e "stopifnot(all(vapply(c(\\"survival\\",\\"boot\\",\\"ggplot2\\",\\"data.table\\",\\"readr\\",\\"dplyr\\"), requireNamespace, logical(1), quietly=TRUE))); cat(\\"PASS: R cloud packages import\\\\n\\")"'
