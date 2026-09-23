@@ -1,12 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-pip install -r requirements-cloud.txt
+python --version
+Rscript --version
 
-Rscript -e 'pkgs <- c("survival","boot","ggplot2","data.table","readr","dplyr"); miss <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly=TRUE)]; if(length(miss)) install.packages(miss, repos="https://cloud.r-project.org")'
+python - <<'PY'
+import numpy
+import pandas
+import scipy
+import sklearn
+import lifelines
+import statsmodels
+import matplotlib
+import pyarrow
+import openpyxl
+import joblib
+print("PASS: Python research packages import")
+PY
+
+Rscript -e 'pkgs <- c("survival","boot","ggplot2","data.table","readr","dplyr"); stopifnot(all(vapply(pkgs, requireNamespace, logical(1), quietly=TRUE))); cat("PASS: R research packages import\n")'
 
 mkdir -p data/private data/processed results checkpoints
 echo "Codespaces environment ready."
