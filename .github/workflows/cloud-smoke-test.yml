@@ -39,15 +39,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build research devcontainer
         run: docker build -f .devcontainer/Dockerfile -t ris-research-cloud .
-      - name: Verify baked Python and R environments as non-root user
+      - name: Verify Python environment as vscode user
         run: |
-          docker run --rm --user vscode ris-research-cloud bash -lc \
-            'python --version && Rscript --version && \
-             python -c "import numpy,pandas,scipy,sklearn,lifelines,statsmodels,matplotlib,pyarrow,openpyxl,joblib; print(\\"PASS: Python baked packages import\\")" && \
-             Rscript -e "stopifnot(all(vapply(c(\\"survival\\",\\"boot\\",\\"ggplot2\\",\\"data.table\\",\\"readr\\",\\"dplyr\\"), requireNamespace, logical(1), quietly=TRUE))); cat(\\"PASS: R baked packages import\\\\n\\")"'
+          docker run --rm --user vscode ris-research-cloud             python -c 'import numpy,pandas,scipy,sklearn,lifelines,statsmodels,matplotlib,pyarrow,openpyxl,joblib; print("PASS: Python baked packages import")'
+      - name: Verify R environment as vscode user
+        run: |
+          docker run --rm --user vscode ris-research-cloud             Rscript -e 'stopifnot(all(vapply(c("survival","boot","ggplot2","data.table","readr","dplyr"), requireNamespace, logical(1), quietly=TRUE))); cat("PASS: R baked packages import\n")'
       - name: Run Codespaces post-create check as vscode user
         run: |
-          docker run --rm \
-            -v "$PWD:/src:ro" \
-            ris-research-cloud bash -lc \
-            'cp -a /src /tmp/repo && chown -R vscode:vscode /tmp/repo && su -s /bin/bash vscode -c "cd /tmp/repo && bash scripts/bootstrap_env.sh"'
+          docker run --rm             -v "$PWD:/src:ro"             ris-research-cloud bash -lc             'cp -a /src /tmp/repo && chown -R vscode:vscode /tmp/repo && su -s /bin/bash vscode -c "cd /tmp/repo && bash scripts/bootstrap_env.sh"'
